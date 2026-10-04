@@ -1,53 +1,50 @@
-# Gatepass — Visitor Management Frontend
+# Gatepass — Online Visitor Management System (QR Approval)
 
-React + Tailwind CSS + Axios frontend for the QR-approval visitor management system.
+One project, two folders. Frontend and backend are matched to each other.
 
-## Stack
-- React 18 + Vite
-- React Router v6 (route protection by role)
-- Tailwind CSS (custom "checkpoint / brass" design tokens — see `tailwind.config.js`)
-- Axios (JWT attached automatically via interceptor)
+| Folder | Stack |
+|---|---|
+| `backend/`  | FastAPI · SQLAlchemy (SQLite default) · JWT + bcrypt · qrcode |
+| `frontend/` | React 18 · Vite · React Router · Tailwind CSS · Axios |
 
-## Setup
+## Run it (two terminals)
+
+**1. Backend** → http://localhost:8000 (Swagger docs at `/docs`)
 
 ```bash
+cd backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+**2. Frontend** → http://localhost:5173
+
+```bash
+cd frontend
 npm install
-cp .env.example .env   # point VITE_API_BASE_URL at your backend
 npm run dev
 ```
 
-App runs at `http://localhost:5173`.
+`frontend/.env` already points at `http://localhost:8000`. Change `VITE_API_BASE_URL`
+if the backend runs elsewhere (and add that frontend origin to CORS in `backend/app/main.py`).
 
-## Pages
+## Try it
 
-| Route          | Role           | Purpose                                   |
-|----------------|----------------|--------------------------------------------|
-| `/login`       | public         | Sign in, redirects by role                 |
-| `/register`    | public         | Create an Employee or Security Head account|
-| `/employee`    | EMPLOYEE       | List own bookings + status, view/download QR pass |
-| `/book-visit`  | EMPLOYEE       | New visitor booking form (with ID upload)  |
-| `/security`    | SECURITY_HEAD  | Review all requests, approve/reject        |
+1. Open http://localhost:5173/register and create one **Employee** and one **Security Head** account.
+2. Log in as the employee → **Book visitor** (an ID proof file is required in the form).
+3. Log in as the security head → **Approve** (generates the QR) or **Reject** (with a reason). Use **View ID proof** to open the uploaded file.
+4. Back as the employee → **View pass** to see the badge with the QR, and **Download QR**.
 
-## Backend contract (matches `../backend`)
+## Configuration (optional)
 
-- `POST /api/auth/register` — `{ name, email, password, role }`
-- `POST /api/auth/login` — `{ email, password }` → `{ access_token, token_type, role, name, email }`
-- `POST /api/book-visit` — multipart form: `visitor_name, visitor_contact, num_visitors, purpose, visit_date, time_slot, id_proof`
-- `GET /api/my-visits` — visits for the logged-in employee
-- `GET /api/all-requests` — all visits (security head)
-- `POST /api/approve/{id}`
-- `POST /api/reject/{id}` — `{ reason }`
-- `GET /api/download-qr/{id}` — QR image (JWT required, so the app loads it as a blob)
-- `GET /api/id-proof/{id}` — uploaded ID proof (JWT required, loaded as a blob)
+```bash
+export DATABASE_URL="postgresql://user:password@localhost:5432/vms_db"   # default: SQLite vms.db
+export JWT_SECRET_KEY="a-long-random-string"                              # set this in production
+```
 
-Visit objects use `visit_date`, `visitor_contact`, `id_proof_path`, `employee_name`.
+## Notes
 
-All authenticated requests send `Authorization: Bearer <token>`; a 401 response clears the
-session and redirects to `/login`.
-
-## Design notes
-
-The UI leans on a "security checkpoint" visual identity: deep navy (`checkpoint`), a brass
-approval accent, and a denial red for rejections. Approved visits render as a stylized
-visitor badge (`VisitorPassCard`) with a perforated top edge, rather than a bare QR image —
-this is the one deliberately distinctive element; everything else stays quiet and functional.
+- The register page lets anyone choose the Security Head role. That is fine for a demo; lock it down before real use.
+- QR codes and ID proofs require the login token, so the frontend loads them through Axios as blobs rather than plain `<img>` / `<a>` links.
