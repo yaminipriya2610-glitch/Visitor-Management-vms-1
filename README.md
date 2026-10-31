@@ -254,6 +254,6 @@ This is a learning/portfolio project. For production use, add HTTPS, secrets man
 
 **Yamini Priya**
 Data / AI / ML student
-GitHub: [@your-username](https://github.com/your-username) · LinkedIn: [your-profile](https://www.linkedin.com/in/your-profile)
+GitHub: [Yamini]https://github.com/yaminipriya2610-glitch LinkedIn: [Yamini]https://www.linkedin.com/in/yamini-balaji-87074231a?utm_source=share_via&utm_content=profile&utm_medium=member_android
 
 If you found this project useful, please ⭐ the repo!# Visitor-Management-vms-1
