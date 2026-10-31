@@ -1,0 +1,428 @@
+{
+  "info": {
+    "name": "Online Visitor Management System API",
+    "description": "Complete Postman collection for the Visitor Management System. Run requests in order. Tokens and booking IDs are captured automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "employeeToken",
+      "value": ""
+    },
+    {
+      "key": "securityToken",
+      "value": ""
+    },
+    {
+      "key": "employeeId",
+      "value": ""
+    },
+    {
+      "key": "securityId",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "qrToken",
+      "value": ""
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000/api"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. Seed Demo Accounts",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/dev/seed-demo",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "dev",
+            "seed-demo"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Demo data ready', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Login Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"employee@example.com\",\n  \"password\": \"employee123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.test('Login successful', function () { pm.response.to.have.status(200); });",
+              "pm.collectionVariables.set('employeeToken', json.access_token);",
+              "pm.collectionVariables.set('employeeId', json.user.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Employee Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{employeeToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Create Visitor Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{employeeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bookings",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"visitor_name\": \"Ravi Kumar\",\n  \"visitor_contact\": \"9876543210\",\n  \"id_proof_type\": \"Aadhaar\",\n  \"id_proof_number\": \"1234-5678-9012\",\n  \"purpose\": \"Client meeting\",\n  \"visit_date\": \"2030-12-15\",\n  \"start_time\": \"10:00\",\n  \"end_time\": \"11:00\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.test('Booking created', function () { pm.response.to.have.status(201); });",
+              "pm.collectionVariables.set('bookingId', json.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. My Bookings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{employeeToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bookings/my",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings",
+            "my"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Login Security Head",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"security@example.com\",\n  \"password\": \"security123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.test('Login successful', function () { pm.response.to.have.status(200); });",
+              "pm.collectionVariables.set('securityToken', json.access_token);",
+              "pm.collectionVariables.set('securityId', json.user.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Security Pending Bookings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{securityToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/security/bookings?status_filter=PENDING",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "security",
+            "bookings"
+          ],
+          "query": [
+            {
+              "key": "status_filter",
+              "value": "PENDING"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. Approve Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{securityToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/security/bookings/{{bookingId}}/approve",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "security",
+            "bookings",
+            "{{bookingId}}",
+            "approve"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.test('Booking approved', function () { pm.response.to.have.status(200); pm.expect(json.status).to.eql('APPROVED'); });",
+              "pm.collectionVariables.set('qrToken', json.qr_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Booking Details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{employeeToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bookings/{{bookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings",
+            "{{bookingId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11. Verify QR",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{securityToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/security/verify",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "security",
+            "verify"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"qr_token\": \"{{qrToken}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.test('QR valid', function () { pm.response.to.have.status(200); pm.expect(json.valid).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Download QR PNG",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{employeeToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bookings/{{bookingId}}/qr",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings",
+            "{{bookingId}}",
+            "qr"
+          ]
+        }
+      }
+    },
+    {
+      "name": "13. Reject Booking (separate request)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{securityToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/security/bookings/{{bookingId}}/reject",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "security",
+            "bookings",
+            "{{bookingId}}",
+            "reject"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rejection_reason\": \"Please provide a valid meeting reference.\"\n}"
+        },
+        "description": "Use this request on a NEW pending booking. The sample flow above approves the current booking, so do not run this against the same booking after approval."
+      }
+    }
+  ]
+}
